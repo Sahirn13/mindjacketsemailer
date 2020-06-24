@@ -2,17 +2,47 @@ const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const nodemailer = require("nodemailer");
+const https = require('https');
 
 const details = require("./details.json");
 
 const app = express();
 var port = process.env.PORT || 8080;
+
+const apiUrl = 'https://3fc9a07bff71932e4986621c9145e8e4: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@mindjackets.myshopify.com';
+const assetsEndpoint = '/admin/api/2020-04/themes/81246584897/assets.json';
+
 app.use(cors({ origin: "*" }));
 app.use(bodyParser.json({limit: '50mb', extended: true}));
 app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 
 app.listen(port, () => {
     console.log("The server started on port " + port);
+});
+
+app.get("/", (req, res) => {
+   res.send('hello world');
+});
+
+app.get("/getassets", (req, res) => {
+    console.log('end point hit');
+    https.get(apiUrl + assetsEndpoint, (resp) => {
+        let data = '';
+
+        // A chunk of data has been recieved.
+        resp.on('data', (chunk) => {
+            data += chunk;
+        });
+
+        // The whole response has been received. Print out the result.
+        resp.on('end', () => {
+            res.send(data);
+        });
+
+    }).on("error", (err) => {
+        console.log("Error: " + err.message);
+        res.send(err);
+    });
 });
 
 
